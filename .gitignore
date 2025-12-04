@@ -46,6 +46,3 @@ yalc.lock
 
 # vim swap files
 *.swp
-
-# agent worktrees and build artifacts
-.agents/
