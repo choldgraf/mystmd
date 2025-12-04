@@ -1,5 +1,9 @@
 # myst-frontmatter
 
+## 1.9.2
+
+## 1.9.1
+
 ## 1.9.0
 
 ### Minor Changes
