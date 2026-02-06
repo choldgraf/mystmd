@@ -1,5 +1,11 @@
 # mystmd
 
+## 1.8.1
+
+### Patch Changes
+
+- 4617460: Add support for remote parts
+
 ## 1.8.0
 
 ### Minor Changes
