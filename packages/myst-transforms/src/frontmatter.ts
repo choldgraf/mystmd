@@ -102,10 +102,17 @@ export function getFrontmatter(
   // Explicitly handle the case of an H1 directly after the frontmatter
   if (nextNodeIsH1 && !titleNull) {
     const title = toText(nextNode.children);
-    // Only remove the title if it is the same
+    // Only remove the title if it is the same and contains only text children.
+    // Headings with non-text children (e.g. inlineMath, emphasis) are kept in
+    // the tree so those AST nodes are preserved for rendering.
+    const hasOnlyTextChildren = (nextNode.children as any[])?.every(
+      (child: any) => child.type === 'text',
+    );
     if (frontmatter.title && frontmatter.title === title && !opts.keepTitleNode) {
-      (nextNode as any).type = '__delete__';
-      frontmatter.content_includes_title = false;
+      if (hasOnlyTextChildren) {
+        (nextNode as any).type = '__delete__';
+        frontmatter.content_includes_title = false;
+      }
       // If this has a label add it to the page identifiers for reference resolution
       if (nextNode.label) {
         const { identifier } = normalizeLabel(nextNode.label) ?? {};

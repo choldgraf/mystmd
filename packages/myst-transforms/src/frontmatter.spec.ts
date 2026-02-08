@@ -866,6 +866,39 @@ describe('getFrontmatter', () => {
     const { identifiers } = getFrontmatter(new VFile(), copy(input), {});
     expect(identifiers).toEqual(['h1']);
   });
+  it('h1 with inline math preserved in tree', () => {
+    const input = {
+      type: 'root',
+      children: [
+        {
+          type: 'heading',
+          depth: 1,
+          children: [
+            {
+              type: 'text',
+              value: 'Title with ',
+            },
+            {
+              type: 'inlineMath',
+              value: 'x^2',
+            },
+            {
+              type: 'text',
+              value: ' math',
+            },
+          ],
+        },
+        {
+          type: 'text',
+          value: 'hello',
+        },
+      ],
+    };
+    const { tree, frontmatter } = getFrontmatter(new VFile(), copy(input), {});
+    // H1 stays in tree so inline math nodes are preserved for rendering
+    expect(tree).toEqual(input);
+    expect(frontmatter).toEqual({ title: 'Title with x^2 math', content_includes_title: true });
+  });
   it('preFrontmatter fills and replaces file frontmatter', () => {
     const input = {
       type: 'root',
