@@ -213,6 +213,56 @@ project:
 
 In particular: hidden pages do not impact numbering; also they can be referred to by other pages in the project.
 
+(open-in-toc)=
+
+### Expanding sections by default
+
+By default, sections in the Table of Contents sidebar are collapsed unless they contain the currently active page. You can override this by adding `open: true` to any entry that has `children`, which causes that section to appear expanded when the page first loads.
+
+This is useful for sites like course websites, where you want the current week's material to be immediately visible:
+
+```{code} yaml
+:filename: myst.yml
+version: 1
+project:
+  toc:
+    - file: index.md
+    - title: "Week 1 - Introduction"
+      children:
+        - file: week1/lecture.md
+        - file: week1/lab.md
+    - title: "Week 2 - Data Types"
+      open: true
+      children:
+        - file: week2/lecture.md
+        - file: week2/lab.md
+    - title: "Week 3 - Functions"
+      children:
+        - file: week3/lecture.md
+        - file: week3/lab.md
+```
+
+In this example, "Week 2" will always start expanded in the sidebar, while "Week 1" and "Week 3" will only expand if the user navigates to a page within them.
+
+`open` works on both title-only groupings and file entries with children:
+
+```{code} yaml
+:filename: myst.yml
+version: 1
+project:
+  toc:
+    - file: index.md
+    - file: guide.md
+      open: true
+      children:
+        - file: guide/getting-started.md
+        - file: guide/configuration.md
+```
+
+:::{note}
+`open` only controls the initial expansion state. Users can still collapse an expanded section by clicking the toggle. Sections containing the active page will always be expanded, regardless of the `open` setting.
+:::
+
 ## In-page table of contents
 
 The {myst:directive}`toc` directive displays a list of titles and links for all headers that follow on the page. This can be done at the `project`, `page`, or `section`, level.

@@ -82,6 +82,22 @@ test('Single file entry with invalid children fails', () => {
   expect(opts.messages.warnings).toBeUndefined();
 });
 
+test('File entry with open and children passes', () => {
+  const input = [{ file: 'foo.md', open: true, children: [{ file: 'bar.md' }] }];
+  const toc = validateTOC(input, opts);
+  expect(opts.messages.errors?.length).toBeFalsy();
+  expect(opts.messages.warnings?.length).toBeFalsy();
+  expect(toc).toStrictEqual(input);
+});
+
+test('Parent entry with open passes', () => {
+  const input = [{ title: 'Section', open: true, children: [{ file: 'bar.md' }] }];
+  const toc = validateTOC(input, opts);
+  expect(opts.messages.errors?.length).toBeFalsy();
+  expect(opts.messages.warnings?.length).toBeFalsy();
+  expect(toc).toStrictEqual(input);
+});
+
 test('Single parent entry passes', () => {
   const input = [{ title: 'Bar', children: [] }];
   const toc = validateTOC(input, opts);
@@ -130,8 +146,8 @@ describe.each([
   ['pattern', 'main*.md'],
 ])('Single %s entry', (entryName, entryValue) => {
   test.each([
-    // for now we have only this one exposed
     ['hidden', true, true],
+    ['open', true, true],
     // the other ones are expected to be pruned at validation time
     ['numbering', '1.2.3', false],
     ['id', 'foo', false],

@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import memfs from 'memfs';
 import { Session } from '../session';
 import { projectFromPath } from './fromPath';
-import { pagesFromSphinxTOC, projectFromSphinxTOC } from './fromTOC';
+import { pagesFromSphinxTOC, projectFromSphinxTOC, projectFromTOC } from './fromTOC';
 import { tocFromProject } from './toTOC';
 import { findProjectsOnPath } from './load';
 
@@ -1101,5 +1101,75 @@ chapters:
         { slug: 'section.z', file: 'section/z.md', level: 2, implicit: true },
       ],
     });
+  });
+});
+
+describe('projectFromTOC with open', () => {
+  it('open on parent entry flows through to pages', () => {
+    memfs.vol.fromJSON({
+      'myst.yml': 'version: 1\nproject: {}',
+      'index.md': '',
+      'week1.md': '',
+      'week2.md': '',
+    });
+    const toc = [
+      { file: 'index.md' },
+      {
+        title: 'Week 1',
+        children: [{ file: 'week1.md' }],
+      },
+      {
+        title: 'Week 2',
+        open: true,
+        children: [{ file: 'week2.md' }],
+      },
+    ];
+    const project = projectFromTOC(session, '.', toc);
+    expect(project.pages).toEqual([
+      { title: 'Week 1', level: -1 },
+      { slug: 'week1', file: 'week1.md', level: 0 },
+      { title: 'Week 2', level: -1, open: true },
+      { slug: 'week2', file: 'week2.md', level: 0 },
+    ]);
+  });
+
+  it('open on file entry with children flows through', () => {
+    memfs.vol.fromJSON({
+      'myst.yml': 'version: 1\nproject: {}',
+      'index.md': '',
+      'guide.md': '',
+      'getting-started.md': '',
+    });
+    const toc = [
+      { file: 'index.md' },
+      {
+        file: 'guide.md',
+        open: true,
+        children: [{ file: 'getting-started.md' }],
+      },
+    ];
+    const project = projectFromTOC(session, '.', toc);
+    expect(project.pages).toEqual([
+      { slug: 'guide', file: 'guide.md', level: 1, open: true },
+      { slug: 'getting-started', file: 'getting-started.md', level: 2 },
+    ]);
+  });
+
+  it('open is absent when not set', () => {
+    memfs.vol.fromJSON({
+      'myst.yml': 'version: 1\nproject: {}',
+      'index.md': '',
+      'page.md': '',
+    });
+    const toc = [
+      { file: 'index.md' },
+      {
+        title: 'Section',
+        children: [{ file: 'page.md' }],
+      },
+    ];
+    const project = projectFromTOC(session, '.', toc);
+    expect(project.pages[0]).toEqual({ title: 'Section', level: -1 });
+    expect(project.pages[0]).not.toHaveProperty('open');
   });
 });
